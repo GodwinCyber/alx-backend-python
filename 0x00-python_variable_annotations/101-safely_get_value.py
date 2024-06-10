@@ -10,7 +10,7 @@ def safely_get_value(
     dct: Mapping,
     key: Any,
     default: Union[T, None] = None
-) -> Union[T, Any]:
+) -> Union[Any, T]:
     """Retrieve value from a dictionary with default fallback
     Args:
         dct (Mapping): The dictionary to retrieve value from:
