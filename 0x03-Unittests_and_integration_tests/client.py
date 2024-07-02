@@ -55,3 +55,4 @@ class GithubOrgClient:
             has_license = access_nested_map(repo, ("license", "key")) == license_key
         except KeyError:
             return False
+        return has_license
