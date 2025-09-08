@@ -30,6 +30,7 @@ def stream_users_in_batches(batch_size):
     finally:
         if connection and connection.is_connected():
             connection.close()
+    return
 
 def batch_processing(batch_size):
     for batch in stream_users_in_batches(batch_size):
@@ -38,6 +39,7 @@ def batch_processing(batch_size):
         for user in batch:
             if user.get('age', 0) > 25:
                 yield user
+    return
 
 if __name__ == "__main__":
     for user in batch_processing(10):
