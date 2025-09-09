@@ -14,6 +14,7 @@ You must use no more than two loops in your script
 
 You are not allowed to use the SQL AVERAGE
     Prototype: def stream_user_ages()
+You are not allowed to use the SQL AVERAGE task
 """
 
 def stream_user_ages():
