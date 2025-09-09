@@ -1,4 +1,5 @@
 #!/bin/usr/env python3
+"""You are not allowed to use the SQL AVERAGE task"""
 
 from mysql.connector import Error
 seed = __import__('seed')
@@ -14,7 +15,6 @@ You must use no more than two loops in your script
 
 You are not allowed to use the SQL AVERAGE
     Prototype: def stream_user_ages()
-You are not allowed to use the SQL AVERAGE task
 """
 
 def stream_user_ages():
