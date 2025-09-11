@@ -121,3 +121,32 @@ def setup_database_retry():
     conn.close()
     print("Database setup complete.")
 
+def setup_database_cache():
+    """Set up a SQLite database with a users table and sample data."""
+    db_filename = 'users.db'
+    if os.path.exists(db_filename):
+        os.remove(db_filename)  # Remove existing database for a fresh setup
+
+    conn = sqlite3.connect(db_filename)
+    cursor = conn.cursor()
+
+    # Create users table
+    cursor.execute('''
+        CREATE TABLE users (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL UNIQUE
+        )
+    ''')
+
+    # Insert sample data
+    users = [
+        (str(uuid.uuid4()), 'Alice', 'example@cache.com'),
+        (str(uuid.uuid4()), 'Bob', 'example1@cache.com'),
+        (str(uuid.uuid4()), 'Charlie', 'example2@cache.com'),
+        (str(uuid.uuid4()), 'David', 'example3@cache.com')
+    ]
+    cursor.executemany('INSERT INTO users (id, name, email) VALUES (?, ?, ?)', users)
+    conn.commit()
+    conn.close()
+    print("Database setup complete.")
