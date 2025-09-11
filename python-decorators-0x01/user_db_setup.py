@@ -59,3 +59,34 @@ def setup_database_connection():
     conn.commit()
     conn.close()
     print("Database setup complete.")
+
+def setup_database_transactions():
+    """Set up a SQLite database with a users table and sample data."""
+    db_filename = 'users.db'
+    if os.path.exists(db_filename):
+        os.remove(db_filename)  # Remove existing database for a fresh setup
+
+    conn = sqlite3.connect(db_filename)
+    cursor = conn.cursor()
+
+    # Create users table
+    cursor.execute('''
+        CREATE TABLE users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL UNIQUE
+        )
+    ''')
+
+    # Insert sample data
+    users = [
+        ('Alice', 'example@transaction.com'),
+        ('Bob', 'example1@transaction.com'),
+        ('Charlie', 'example2@transaction.com'),
+        ('David', 'example3@transaction.com')
+    ]
+    cursor.executemany('INSERT INTO users (name, email) VALUES (?, ?)', users)
+    conn.commit()
+    conn.close()
+    print("Database setup complete.")
+
