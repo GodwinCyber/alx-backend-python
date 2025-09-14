@@ -5,7 +5,7 @@ from typing import List, Dict, Any
 from user_db import setup_database_concurrent
 
 db_name = 'uses.db'
-async def async_fetch_users(db: aiosqlite.Connection) -> List[Dict[str, Any]]:
+async def aasync_fetch_users(db: aiosqlite.Connection) -> List[Dict[str, Any]]:
     '''Fetches all the users from the database'''
     async with db.execute('SELECT name, age FROM users') as cursor:
         rows = await cursor.fetchall()
@@ -27,7 +27,7 @@ async def fetch_concurrently():
         #db.row_factory = aiosqlite.Row # Configure row to be accessible by name
 
         # Run both queries concurrently
-        all_users_task = async_fetch_users(db)
+        all_users_task = aasync_fetch_users(db)
         older_users_task = async_fetch_older_users(db)
 
 
