@@ -29,3 +29,35 @@ def setup_database_connection():
     conn.close()
     print("Database setup complete.")
 
+
+def setup_database_execute(db_path):
+    '''Set up database for SQLite for data: '''
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    cursor.execute('DROP TABLE IF EXISTS users')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL UNIQUE,
+            age INTEGER
+        )
+    ''')
+
+    user_data = [
+        ('Alic', 'example@alic.com', 30),
+        ('Bob', 'example@bob.com', 22),
+        ('Charlie', 'example@charlie.com', 28),
+        ('King', 'example@king.com', 40)
+    ]
+    cursor.executemany('INSERT or IGNORE INTO users (name, email, age) VALUES (?, ?, ?)', user_data)
+    conn.commit()
+    conn.close()
+    print(f'Database setup successfully')
+
+
+
+
+
