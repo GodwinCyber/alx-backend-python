@@ -1,6 +1,7 @@
 import os
 import sqlite3
 import uuid
+import aiosqlite
 
 def setup_database_connection():
     '''set up a SQLite database with a users table and sample data'''
@@ -58,6 +59,29 @@ def setup_database_execute(db_path):
     print(f'Database setup successfully')
 
 
+async def setup_database_concurrent(db_path: str):
+    '''Initializing a database and populating it with simple database'''
+    if os.path.exists(db_path):
+         os.remove(db_path)
+    async with aiosqlite.connect(db_path) as db:
+        await db.execute('''
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                email TEXT NOT NULL UNIQUE,
+                age INTEGER NOT NULL
+            )
+    ''')
+        users_data = [
+            ('Alice', 'example@alice.com', 30),
+            ('Bob', 'example@bob.com', 45),
+            ('Charlie', 'example@charlie.com', 50),
+            ('David', 'example@david.com', 25),
+            ('Eve', 'example@eve.com', 60)
+        ]
+        await db.executemany('INSERT INTO users (name, email, age) VALUES (?, ?, ?)', users_data)
+        await db.commit()
+        print('Database setup successfully')
 
 
 
