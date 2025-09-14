@@ -18,14 +18,6 @@ async def async_fetch_users(db: aiosqlite.Connection) -> List[Dict[str, Any]]:
     """Fetches all the users from the database"""
     async with db.execute("SELECT name, age FROM users;") as cursor:
         rows = await cursor.fetchall()
-        print("Fetched all users")
-        return [{'name': row[0], 'age': row[1]} for row in rows]
-
-
-async def async_fetch_users(db: aiosqlite.Connection) -> List[Dict[str, Any]]:
-    """Fetch all the users from the database"""
-    async with db.execute("SELECT name, age FROM users;") as cursor:
-        rows = await cursor.fetchall()
         return [{'name': row[0], 'age': row[1]} for row in rows]
 
 
@@ -58,6 +50,7 @@ async def fetch_concurrently():
 
 if __name__ == "__main__":
     asyncio.run(fetch_concurrently())
+
 
 
 
