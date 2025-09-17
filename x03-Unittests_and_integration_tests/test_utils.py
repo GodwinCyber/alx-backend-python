@@ -2,9 +2,11 @@
 '''Generic utilities for github org client.'''
 
 import unittest
+from unittest.mock import Mock, patch
 from parameterized import parameterized
 from typing import Dict, Tuple, Any
 from utils import access_nested_map
+import utils
 
 class TestAccessNestedMap(unittest.TestCase):
     '''Test class for access nested map function.'''
@@ -26,3 +28,27 @@ class TestAccessNestedMap(unittest.TestCase):
         '''Test access_nested_map function with KeyError.'''
         with self.assertRaises(KeyError):
             access_nested_map(nested_map, path)
+
+class TestGetJson(unittest.TestCase):
+    '''Test class for get_json function.'''
+    @parameterized.expand([
+        ("http://example.com", {"payload": True}),
+        ("http://holberton.io", {"payload": False}),
+    ])
+    @patch('requests.get')
+    def test_get_json(self, test_url: str, test_payload: Dict, mock_get: Mock):
+        '''Tests that get_json returns the expected result and calls requests.get once'''
+        # configure the mock to return a response with the test payload
+        mock_response = Mock()
+        mock_response.json.return_value = test_payload
+        mock_get.return_value = mock_response
+
+        # call the function under test
+        results = utils.get_json(test_url)
+
+        # assertions
+        mock_get.assert_called_once_with(test_url)
+        self.assertEqual(results, test_payload)
+
+
+
