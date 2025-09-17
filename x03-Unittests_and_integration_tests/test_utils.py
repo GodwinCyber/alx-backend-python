@@ -9,7 +9,7 @@ from utils import access_nested_map
 class TestAccessNestedMap(unittest.TestCase):
     '''Test class for access nested map function.'''
     @parameterized.expand([
-        ({"a": 1}, ("a"), 1),
+        ({"a": 1}, ("a",), 1),
         ({"a": {"b": 2}}, ("a",), {"b": 2}),
         ({"a": {"b": 2}}, ("a", "b"), 2)
     ])
@@ -25,4 +25,4 @@ class TestAccessNestedMap(unittest.TestCase):
     def test_access_nested_map_exception(self, nested_map: Dict, path: Tuple):
         '''Test access_nested_map function with KeyError.'''
         with self.assertRaises(KeyError):
-            access_nested_map(nested_map, path)()
+            access_nested_map(nested_map, path)
