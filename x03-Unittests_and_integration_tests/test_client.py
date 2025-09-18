@@ -33,7 +33,7 @@ class TestGithubOrgClient(unittest.TestCase):
         self.assertEqual(result, expected_payload)
 
     @patch("client.get_json")
-    def test_public_repos(self, mock_get_json: Mock):
+    def test_public_repos(self, get_json_mock: Mock):
         """Unit-test GithubOrgClient.public_repos."""
 
         # Fake payload returned by repos_payload
@@ -44,7 +44,7 @@ class TestGithubOrgClient(unittest.TestCase):
         ]
 
         # Configure the mock to return a dummy value
-        mock_get_json.return_value = fake_repos_payload
+        get_json_mock.return_value = fake_repos_payload
 
         # Patch GithubOrgClient._public_repos_url to return a fake URL
         with patch.object(
@@ -69,7 +69,7 @@ class TestGithubOrgClient(unittest.TestCase):
             self.assertEqual(result_with_license, expected_result_with_license)
 
             mock_public_repos_url.assert_called()
-            mock_get_json.assert_called_once_with(
+            get_json_mock.assert_called_once_with(
                 "https://api.github.com/orgs/google/repos"
             )
 
