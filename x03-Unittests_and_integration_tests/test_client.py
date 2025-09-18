@@ -72,5 +72,15 @@ class TestGithubOrgClient(unittest.TestCase):
             get_json_mock.assert_called_once_with(
                 "https://api.github.com/orgs/google/repos"
             )
+            @parameterized.expand([
+                ({"license": {"key": "my_license"}}, "my_license", True),
+                ({"license": {"key": "other_license"}}, "my_license")
+            ])
+            def test_has_license(self, repo: Dict, license_key: str, expected: bool = False):
+                '''Test for has_license static method.'''
+                self.assertEqual(
+                    GithubOrgClient.has_license(repo, license_key),
+                    expected
+                )
 
 
