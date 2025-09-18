@@ -50,7 +50,7 @@ class TestGithubOrgClient(unittest.TestCase):
             mock_org.assert_called_once()
 
     @patch('client.get_json')
-    def test_public_repos_with_license(self, mock_get_json:Mock):
+    def test_public_repos(self, mock_get_json:Mock):
         '''Test for public_repos method'''
         # Fake payload returned by repos_payload
         fake_repos_payload = [
