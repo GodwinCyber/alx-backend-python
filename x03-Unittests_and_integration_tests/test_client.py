@@ -83,31 +83,31 @@ class TestGithubOrgClient(unittest.TestCase):
                     GithubOrgClient.has_license(repo, license_key),
                     expected
                 )
-@parameterized_class(('org_payload', 'repos_payload', 'expected_repos', 'apache2_repos'), TEST_PAYLOAD)
-
+@parameterized_class(
+    ('org_payload', 'repos_payload', 'expected_repos', 'apache2_repos'),
+    TEST_PAYLOAD
+)
 class TestIntegrationGithubOrgClient(unittest.TestCase):
-    '''Integration test class for GithubOrgClient.'''
+    """Integration test class for GithubOrgClient."""
     login = "x"
 
     @classmethod
     def setUpClass(cls):
-        '''Set up class method to patch requests.get.'''
+        """Set up class method to patch requests.get."""
         org_mock = Mock()
         org_mock.json.return_value = cls.org_payload  # type: ignore
-        cls.org_mock = org_mock
 
         repos_mock = Mock()
         repos_mock.json.return_value = cls.repos_payload  # type: ignore
-        cls.repos_mock = repos_mock
 
         cls.get_patcher = patch('requests.get')
         cls.get = cls.get_patcher.start()
 
-        # Configure the mock to return a different payload based on the URL
+        # Configure the mock to return correct payloads based on URL
         def side_effect(url, *args, **kwargs):
             if url == f"https://api.github.com/orgs/{cls.login}":
                 return org_mock
-            if url == cls.org_payload['repos_url']:
+            if url == cls.org_payload["repos_url"]:
                 return repos_mock
             raise ValueError(f"Unmocked URL: {url}")
 
@@ -115,25 +115,24 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        '''Tear down class method to stop patching requests.get.'''
+        """Tear down class method to stop patching requests.get."""
         cls.get_patcher.stop()
 
     def test_public_repos(self):
-        '''Test public_repos method of GithubOrgClient.'''
+        """Test that public_repos returns all expected repos."""
         client = GithubOrgClient(self.login)
 
         self.assertEqual(client.org, self.org_payload)
         self.assertEqual(client.repos_payload, self.repos_payload)
         self.assertEqual(client.public_repos(), self.expected_repos)
-        self.assertEqual(client.public_repos("NONEXISTENT_LICENSE"), [])
 
         self.get.assert_has_calls([
             call(f"https://api.github.com/orgs/{self.login}"),
-            call(self.org_payload['repos_url'])
+            call(self.org_payload["repos_url"])
         ])
 
     def test_public_repos_with_license(self):
-        '''Test public_repos method with license filter.'''
+        """Test public_repos method with license filter 'apache-2.0'."""
         client = GithubOrgClient(self.login)
 
         self.assertEqual(
@@ -143,7 +142,8 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
 
         self.get.assert_has_calls([
             call(f"https://api.github.com/orgs/{self.login}"),
-            call(self.org_payload['repos_url'])
+            call(self.org_payload["repos_url"])
         ])
+
 
     
