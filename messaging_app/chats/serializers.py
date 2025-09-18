@@ -7,6 +7,9 @@ class UserSerializer(serializers.ModelSerializer):
     Excludes sensitive fields like password.
     '''
 
+    password = serializers.CharField(write_only=True, required=True)
+    full_name = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         exclude = ['password', 'last_login', 'is_superuser', 'is_staff', 'is_active', 'date_joined', 'groups', 'user_permissions']
@@ -45,6 +48,7 @@ class ConversationSerializer(serializers.ModelSerializer):
     '''
     participants = UserSerializer(many=True, read_only=True)
     messages = MessageSerializer(many=True, read_only=True)
+    message_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Conversation
