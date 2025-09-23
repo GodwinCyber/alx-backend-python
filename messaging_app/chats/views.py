@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework import viewsets
+from rest_framework import viewsets, status, Response
 from .models import Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer
 
@@ -24,4 +24,12 @@ class MessageViewSet(viewsets.ModelViewSet):
     search_fields = ['content'] # Allow searching by content
     ordering_fields = ['created_at'] # Allow ordering by creation date
     ordering = ['-created_at'] # Default ordering by creation date descending
+
+    def create(self, request, *args, **kwargs):
+        '''Custom create method to return a sucess message'''
+        response = super().create(request, *args, **kwargs)
+        return Response(
+            {'message': 'Message sent successfully!', 'data': response.data},
+            status=status.HTTP_201_CREATED
+        )
 
