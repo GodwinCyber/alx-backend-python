@@ -1,4 +1,5 @@
 from django.urls import path, include
+from django.contrib import admin
 from rest_framework import routers
 from .views import ConversationViewSet, MessageViewSet
 
@@ -8,6 +9,7 @@ router.register(r'messages', MessageViewSet, basename='message')
 
 
 urlpatterns = [
-    path("api/", include(router.urls)),
+    path("admin/", admin.site.urls),
+    path("api/", include('chats.urls')),  # Include the chats app URLs
 ]
 
