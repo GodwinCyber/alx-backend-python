@@ -3,11 +3,8 @@ from rest_framework import viewsets
 from .models import Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer
 
-# Create your views here.
-# Using viewsets from rest-framework Create viewsets for listing conversations (ConversationViewSet) and messages (MessageViewSet)
-# Implement the endpoints to create a new conversation and send messages to an existing one
 
-class ConersationViewSet(viewsets.ModelViewSet):
+class ConversationViewSet(viewsets.ModelViewSet):
     '''ViewSet for listing and creating conversations'''
     queryset = Conversation.objects.all() # Fetch all conversations
     serializer_class = ConversationSerializer # Use ConversationSerializer for serialization
