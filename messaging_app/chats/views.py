@@ -5,6 +5,9 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer
 from .permissions import IsParticipantOfConversation
+from .filters import MessageFilter
+from django_filters.rest_framework import DjangoFilterBackend
+from .pagination import MessagePagination
 
 
 class ConversationViewSet(viewsets.ModelViewSet):
@@ -26,8 +29,10 @@ class ConversationViewSet(viewsets.ModelViewSet):
 class MessageViewSet(viewsets.ModelViewSet):
     '''ViewSet for listing and creating messages'''
     serializer_class = MessageSerializer # Use MessageSerializer for serialization
-    http_method_names = ['get', 'post'] # Allow only GET and POST methods
-    filterset_fields = ['conversation', 'sender'] # Allow filtering by conversation and sender
+    http_method_names = ['get', 'post', 'put', 'patch', 'delete'] # Allow only GET and POST methods
+    filterset_fields = [DjangoFilterBackend] # Allow filtering by conversation and sender
+    filterset_class = MessageFilter # Use custom MessageFilter for filtering
+    pagination_class = MessagePagination # Use custom pagination class
     search_fields = ['content'] # Allow searching by content
     ordering_fields = ['created_at'] # Allow ordering by creation date
     ordering = ['-created_at'] # Default ordering by creation date descending
