@@ -15,14 +15,14 @@ class User(AbstractUser):
     Uses UUID as primary key and includes additional fields (phone_number, role)
     '''
     user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    email = models.EmailField(unique=True, name_verbose='email address')
+    email = models.EmailField(unique=True, verbose_name='email address')
     password = models.CharField(max_length=128)
     phone_number = models.CharField(max_length=15, null=False, blank=True)
     role = models.CharField(max_length=10, choices=Role.choices, default=Role.GUEST)
     created_at = models.DateTimeField(auto_now_add=True)
 
     # custom user model settings
-    USSERNAME_FIELD = 'email'
+    USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
     def __str__(self):
