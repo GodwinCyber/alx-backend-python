@@ -41,6 +41,10 @@ INSTALLED_APPS = [
     # third-party apps
     'rest_framework',
     'rest_framework_nested',
+    'rest_framework.authtoken',
+    'rest_framework_simplejwt',
+    'django_filters',
+    'djoser',
 
     # local apps
     'chats',

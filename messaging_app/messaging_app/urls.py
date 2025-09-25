@@ -25,8 +25,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('chats.urls')),  # Include the chats app URLs
     path('api-auth/', include('rest_framework.urls')),  # DRF login/logout views
+    path('api-auth/', include('djoser.urls')),  # Djoser authentication endpoints
+    path('api-auth/', include('djoser.urls.jwt')),  # Djoser JWT endpoints
 
     # JWT authentication endpoints
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/tpken/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]

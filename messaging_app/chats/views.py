@@ -30,7 +30,7 @@ class MessageViewSet(viewsets.ModelViewSet):
     '''ViewSet for listing and creating messages'''
     serializer_class = MessageSerializer # Use MessageSerializer for serialization
     http_method_names = ['get', 'post', 'put', 'patch', 'delete'] # Allow only GET and POST methods
-    filterset_fields = [DjangoFilterBackend] # Allow filtering by conversation and sender
+    filter_backends = [DjangoFilterBackend] # Allow filtering by conversation and sender
     filterset_class = MessageFilter # Use custom MessageFilter for filtering
     pagination_class = MessagePagination # Use custom pagination class
     search_fields = ['content'] # Allow searching by content
