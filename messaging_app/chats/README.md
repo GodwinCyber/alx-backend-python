@@ -30,7 +30,7 @@ __Example__: “`python class CustomHeaderMiddleware: def init(self, getresponse
         response['X-Custom-Header'] = 'Value'
         return response
 ```
-```python
+```json
     ---
     2. **Signals: Using Signals for Event-Driven Architecture**
 
@@ -49,7 +49,8 @@ __Example__: “`python class CustomHeaderMiddleware: def init(self, getresponse
     * Cleaning up resources when an object is deleted.
 
     **Example**:
-
+```
+```python
     from django.db.models.signals import post_save
     from django.dispatch import receiver
     from myapp.models import MyModel
@@ -81,7 +82,7 @@ orders = Order.objects.annotate(totalitems=Count(‘items’)).filter(totalitems
 ## Using F expressions for dynamic field comparisons
 orders = Order.objects.filter(totalpricegt=F(‘discountedprice’))
 
-```python
+```json
     ---
     4. **Caching: Improving Performance with Caching Strategies**
 
@@ -102,7 +103,8 @@ orders = Order.objects.filter(totalpricegt=F(‘discountedprice’))
     * Reducing load times for static content.
 
     **Example**:
-
+```
+```python
     from django.core.cache import cache
     # Cache a value
     cache.set('my_key', 'my_value', timeout=60)
