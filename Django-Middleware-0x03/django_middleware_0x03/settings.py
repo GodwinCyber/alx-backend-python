@@ -79,6 +79,8 @@ MIDDLEWARE = [
 
     # custom middleware for logging requests
     'chats.middleware.RequestLoggingMiddleware',
+    'chats.middleware.RestrictAccessByTimeMiddleware',
+    'chats.middleware.OffensiveLanguageMiddleware',
 ]
 
 ROOT_URLCONF = 'django_middleware_0x03.urls'
