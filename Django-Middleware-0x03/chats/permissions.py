@@ -20,3 +20,4 @@ class IsParticipantOfConversation(BasePermission):
             # Only participants can modify messages or conversations
             return request.user in obj.participants.all()
         return False
+

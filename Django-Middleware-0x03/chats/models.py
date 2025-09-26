@@ -49,3 +49,12 @@ class Message(models.Model):
     message_body = models.TextField()
     sent_at = models.DateTimeField(auto_now_add=True)
 
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    # Additional fields can be added here, for example:
+    # bio = models.TextField(blank=True)
+    # profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True)
+
+    def __str__(self):
+        return self.user.username

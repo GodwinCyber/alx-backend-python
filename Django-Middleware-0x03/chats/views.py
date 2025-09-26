@@ -1,9 +1,9 @@
 from django.shortcuts import render
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, generics, permissions
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .models import Conversation, Message
-from .serializers import ConversationSerializer, MessageSerializer
+from .models import Conversation, Message, User
+from .serializers import ConversationSerializer, MessageSerializer, UserRegistrationSerializer
 from .permissions import IsParticipantOfConversation
 from .filters import MessageFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -55,4 +55,7 @@ class MessageViewSet(viewsets.ModelViewSet):
             return Response({'error': 'You are not a participant of this conversation.'}, status=status.HTTP_403_FORBIDDEN)
         serializer.save(sender=self.request.user, conversation=conversation)
 
-
+class UserRegistrationView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserRegistrationSerializer
+    permission_classes = [permissions.AllowAny]
