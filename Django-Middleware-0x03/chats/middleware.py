@@ -88,4 +88,22 @@ class OffensiveLanguageMiddleware:
             ip = request.META.get('REMOTE_ADDR')
         return ip
 
+class RolepermissionMiddleware:
+    '''Midlleware that check the user's role'''
+    def __init__(self, get_reponse):
+        '''One time configurationa and initialization'''
+        self.get_response = get_reponse
+        self.allowed_role = ('admin', 'moderator')
+
+    def __call__(self, request):
+        '''Check role on every request before view role is executed'''
+        # Assume role is stored is request.user.role
+        if request.user.is_authenticated:
+            user_role = getattr(request.user, 'role', None)
+            if user_role not in self.allowed_role:
+                return HttpResponseForbidden('Access denied, you do not have the required permission')
+            else:
+                return HttpResponseForbidden('Access denied, please login')
+        return self.get_response(request)
+
         
