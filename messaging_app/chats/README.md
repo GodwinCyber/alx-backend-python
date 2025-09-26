@@ -30,7 +30,7 @@ __Example__: “`python class CustomHeaderMiddleware: def init(self, getresponse
         response['X-Custom-Header'] = 'Value'
         return response
 ```
-```json
+```
     ---
     2. **Signals: Using Signals for Event-Driven Architecture**
 
@@ -82,7 +82,7 @@ orders = Order.objects.annotate(totalitems=Count(‘items’)).filter(totalitems
 ## Using F expressions for dynamic field comparisons
 orders = Order.objects.filter(totalpricegt=F(‘discountedprice’))
 
-```json
+```
     ---
     4. **Caching: Improving Performance with Caching Strategies**
 
