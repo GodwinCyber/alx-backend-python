@@ -1,0 +1,75 @@
+{
+    "name": "Api Root",
+    "description": "The default basic root view for DefaultRouter",
+    "renders": [
+        "application/json",
+        "text/html"
+    ],
+    "parses": [
+        "application/json",
+        "application/x-www-form-urlencoded",
+        "multipart/form-data"
+    ]
+},
+{
+    "name": "Token Obtain Pair",
+    "description": "Takes a set of user credentials and returns an access and refresh JSON web\ntoken pair to prove the authentication of those credentials.",
+    "renders": [
+        "application/json",
+        "text/html"
+    ],
+    "parses": [
+        "application/json",
+        "application/x-www-form-urlencoded",
+        "multipart/form-data"
+    ],
+    "actions": {
+        "POST": {
+            "email": {
+                "type": "string",
+                "required": true,
+                "read_only": false,
+                "label": "Email"
+            },
+            "password": {
+                "type": "string",
+                "required": true,
+                "read_only": false,
+                "label": "Password"
+            }
+        }
+    }
+},
+{
+    "name": "Token Refresh",
+    "description": "Takes a refresh type JSON web token and returns an access type JSON web\ntoken if the refresh token is valid.",
+    "renders": [
+        "application/json",
+        "text/html"
+    ],
+    "parses": [
+        "application/json",
+        "application/x-www-form-urlencoded",
+        "multipart/form-data"
+    ],
+    "actions": {
+        "POST": {
+            "refresh": {
+                "type": "string",
+                "required": true,
+                "read_only": false,
+                "label": "Refresh"
+            },
+            "access": {
+                "type": "string",
+                "required": false,
+                "read_only": true,
+                "label": "Access"
+            }
+        }
+    }
+}
+
+
+
+
