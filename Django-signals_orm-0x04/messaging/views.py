@@ -11,6 +11,7 @@ from .serializers import (
 )
 from .utils import build_thread
 from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
 
 
 class MessageViewSet(viewsets.ModelViewSet):
@@ -49,6 +50,22 @@ class MessageViewSet(viewsets.ModelViewSet):
         # Build recursive thread
         thread = [build_thread(m) for m in root_message]
         return JsonResponse(thread, safe=False)
+    
+    @login_required
+    def unread_inbox(request):
+        '''Fetch only unread messages for the logged-in user'''
+        unread_message = Message.unread.for_user(request.user)
+        data = [
+            {
+                'id': msg.id,
+                'sender': msg.sender.username,
+                'receiver': msg.receiver.username,
+                'content': msg.content,
+                'created_at': msg.created_at
+            }
+            for msg in unread_message
+        ]
+        return JsonResponse(data, safe=False)
 
 
 class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
