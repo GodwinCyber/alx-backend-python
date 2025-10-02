@@ -2,6 +2,7 @@ from django.db import models
 import uuid
 from django.contrib.auth import get_user_model
 from django.conf import settings
+from django.utils import timezone
 
 # Create your models here.
 User = get_user_model()
@@ -14,6 +15,8 @@ class Message(models.Model):
     content = models.TextField()
     edited = models.BooleanField(default=False)
     timestamp = models.DateField(auto_now_add=True)
+    parent_message = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         '''Return the message'''
