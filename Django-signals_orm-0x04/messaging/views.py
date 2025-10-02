@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
@@ -8,6 +9,8 @@ from .serializers import (
     NotificationSerializer,
     MessageHistorySerializer,
 )
+from .utils import build_thread
+from django.http import JsonResponse
 
 
 class MessageViewSet(viewsets.ModelViewSet):
@@ -59,3 +62,24 @@ class MessageHistoryViewSet(viewsets.ReadOnlyModelViewSet):
         return MessageHistory.objects.filter(
             Q(message__sender=user) | Q(message__receiver=user)
         ).select_related("message", "edited_by")
+
+
+class MessageThreadView(viewsets.ModelViewSet):
+    """
+    Class-based view to fetch a message thread with all its replies.
+    Ensures the logged-in user is either the sender or receiver.
+    """
+
+    def get(self, request, message_id):
+        # Fetch the root message
+        root_message = get_object_or_404(
+            Message.objects.select_related("sender", "receiver")
+            .prefetch_related("replies"),
+            id=message_id,
+            sender=request.user,   # ✅ Enforce that only sender can view their thread
+        )
+
+        # Build recursive thread
+        thread = build_thread(root_message)
+        return JsonResponse(thread, safe=False)
+
