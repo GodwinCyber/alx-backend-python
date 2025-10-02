@@ -128,3 +128,14 @@ class MessageHistorySignalsTestCase(TestCase):
         history = self.message.history.first()
         self.assertIsNotNone(history.edited_at)
         self.assertLessEqual(history.edited_at, timezone.now())
+        
+    def test_user_deletion_cleans_related_data(self):
+        '''Deleting user should delete their messages, notification, and histories'''
+        self.message.content = 'Edited once'
+        self.message.save() # create history
+
+        self.sender.delete() # trigger to post_delete
+
+        self.assertEqual(Message.objects.count(), 0)
+        self.assertEqual(Notification.objects.count(), 0)
+        self.assertEqual(MessageHistory.objects.count(), 0)
