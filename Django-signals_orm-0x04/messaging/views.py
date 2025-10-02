@@ -38,13 +38,15 @@ class MessageViewSet(viewsets.ModelViewSet):
 
     def get_message_thread(request, message_id):
         """Get the thread message from both the sender and replies."""
-        root_message = get_list_or_404(
-            Message.objects.select_related("sender", "receiver")
-            .prefetch_related("replies")
-            .filter(Q(sender=request.user) | Q(receiver=request.user)),
-            id=message_id,
-        )
+        # Explicit filter query first
+        queryset = Message.objects.filter(
+            Q(sender=request.user) | Q(receiver=request.user)
+        ).select_related("sender", "receiver").prefetch_related("replies")
 
+        # Ensure the message exists within the user's conversation
+        root_message = get_list_or_404(queryset, id=message_id)
+
+        # Build recursive thread
         thread = [build_thread(m) for m in root_message]
         return JsonResponse(thread, safe=False)
 
