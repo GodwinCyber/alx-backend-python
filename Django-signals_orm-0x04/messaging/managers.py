@@ -1,9 +1,9 @@
 from django.db import models
 
-class UnreadMessageManager(models.Manager):
+class UnreadMessagesManager(models.Manager):
     '''Custome manager to filter unread message for a user'''
 
-    def for_user(self, user):
+    def unread_for_user(self, user):
         '''
             Return unread message for the given user (as receiver)
             Uses `.only()` and `selected_related` for query optimization

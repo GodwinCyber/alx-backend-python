@@ -3,7 +3,7 @@ import uuid
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.utils import timezone
-from .managers import UnreadMessageManager
+from .managers import UnreadMessagesManager
 
 # Create your models here.
 User = get_user_model()
@@ -21,7 +21,7 @@ class Message(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
 
     objects = models.Manager() # Defualt manager
-    unread = UnreadMessageManager() # custom manager
+    unread = UnreadMessagesManager() # custom manager
 
     def __str__(self):
         '''Return the message'''

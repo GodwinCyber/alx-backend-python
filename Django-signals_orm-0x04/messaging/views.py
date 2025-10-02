@@ -54,7 +54,12 @@ class MessageViewSet(viewsets.ModelViewSet):
     @login_required
     def unread_inbox(request):
         '''Fetch only unread messages for the logged-in user'''
-        unread_message = Message.unread.for_user(request.user)
+        unread_messages = (
+            Message.unread.unread_for_user(request.user)
+            .only('id', 'sender__username', 'receiver__username', 'content', 'created_at')
+            .select_related('sender', 'receiver')
+        )
+        
         data = [
             {
                 'id': msg.id,
@@ -63,7 +68,7 @@ class MessageViewSet(viewsets.ModelViewSet):
                 'content': msg.content,
                 'created_at': msg.created_at
             }
-            for msg in unread_message
+            for msg in unread_messages
         ]
         return JsonResponse(data, safe=False)
 
