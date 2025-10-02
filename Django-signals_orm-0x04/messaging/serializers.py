@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Message, Notification, MessageHistory
+from .models import Message, Notification, MessageHistory, Conversation
 
 User = get_user_model()
 
@@ -61,3 +61,10 @@ class MessageHistorySerializer(serializers.ModelSerializer):
         model = MessageHistory
         fields = "__all__"
         read_only_fields = ["id", "edited_at"]
+
+class ConversationSerializer(serializers.ModelSerializer):
+    messages = MessageSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Conversation
+        fields = ["id", "participants", "created_at", "messages"]

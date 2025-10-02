@@ -8,9 +8,24 @@ from .managers import UnreadMessagesManager
 # Create your models here.
 User = get_user_model()
 
+class Conversation(models.Model):
+    """
+    Conversation model to group messages between two or more users.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    participants = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name="conversations"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Conversation {self.id} with {', '.join([u.username for u in self.participants.all()])}"
+
 class Message(models.Model):
     '''Create Message model class that store message between two user'''
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='message', null=True, blank=True)
     sender = models.ForeignKey(User, related_name='sent_message', on_delete=models.CASCADE)
     receiver = models.ForeignKey(User, related_name='receive_message', on_delete=models.CASCADE)
     content = models.TextField()
@@ -57,5 +72,4 @@ class MessageHistory(models.Model):
     def __str__(self):
         '''Return the hostory the message'''
         return f'History for {self.message.id} at {self.edited_at}'
-
 
