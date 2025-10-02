@@ -1,56 +1,61 @@
-from django.shortcuts import redirect, get_list_or_404
-from django.contrib.auth import get_user_model, logout
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from .models import Message
-from .utils import build_thread
-
-# Create your views here.
-
-User = get_user_model()
-@login_required
-def delete_user(request):
-    '''Allow a logged-in user to delete their account'''
-    user = request.user
-    logout(request) # log out before deleting
-    user.delete()  # trigger post_delete signals
-    return redirect('home') # Redirect to homepage after deletion
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
+from django.db.models import Q
+from django_filters.rest_framework import DjangoFilterBackend
+from .models import Message, Notification, MessageHistory
+from .serializers import (
+    MessageSerializer,
+    NotificationSerializer,
+    MessageHistorySerializer,
+)
 
 
+class MessageViewSet(viewsets.ModelViewSet):
+    """ViewSet for listing, creating, and managing messages."""
 
-def get_conversation(request, user_id):
-    '''Fetch conversation between current user and the other user with the replies included'''
-    messages = (
-        Message.objects.filter(receiver_id=user_id)
-        .select_related('sender', 'receiver', 'parent_message') # optimize FKS
-        .prefetch_related('replies')
-        .order_by('created_at')
-    )
+    serializer_class = MessageSerializer
+    http_method_names = ["get", "post", "put", "patch", "delete"]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ["sender", "receiver", "parent_message"]
+    permission_classes = [IsAuthenticated]
 
-    data = [
-        {
-            'id':msg.id,
-            'sender': msg.sender.username,
-            'receiver': msg.receiver.username,
-            'content': msg.content,
-            'replies': [
-                {
-                    'id':r.id, 'content': r.content, 'sender': r.sender.username
-                }
-                for r in msg.replies.all()
-            ],
-        }
-        for msg in messages
-    ]
-    return JsonResponse(data, safe=False)
+    def get_queryset(self):
+        """Only return messages involving the logged-in user (as sender or receiver)."""
+        user = self.request.user
+        return (
+            Message.objects.select_related("sender", "receiver", "parent_message")
+            .prefetch_related("replies")
+            .filter(Q(sender=user) | Q(receiver=user))
+            .order_by("-created_at")
+        )
 
-def get_message_thread(request, message_id):
-    '''Get the thread message from both the sender and replies'''
-    root_message = get_list_or_404(
-        Message.objects.select_related('sender', 'receiver').prefetch_related('replies'), id=message_id
-    )
-
-    thread = build_thread(root_message)
-    return JsonResponse(thread, safe=False)
+    def perform_create(self, serializer):
+        """Set the sender as the logged-in user automatically."""
+        serializer.save(sender=self.request.user)
 
 
+class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet for viewing user notifications."""
+
+    serializer_class = NotificationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """Return notifications belonging to the logged-in user."""
+        return Notification.objects.filter(user=self.request.user).select_related(
+            "message", "user"
+        )
+
+
+class MessageHistoryViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet for viewing history of edited messages."""
+
+    serializer_class = MessageHistorySerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """Return history of messages the logged-in user has access to."""
+        user = self.request.user
+        return MessageHistory.objects.filter(
+            Q(message__sender=user) | Q(message__receiver=user)
+        ).select_related("message", "edited_by")
