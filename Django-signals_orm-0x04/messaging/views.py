@@ -1,5 +1,5 @@
 from rest_framework import viewsets
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_list_or_404
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
@@ -36,6 +36,18 @@ class MessageViewSet(viewsets.ModelViewSet):
         """Set the sender as the logged-in user automatically."""
         serializer.save(sender=self.request.user)
 
+    def get_message_thread(request, message_id):
+        """Get the thread message from both the sender and replies."""
+        root_message = get_list_or_404(
+            Message.objects.select_related("sender", "receiver")
+            .prefetch_related("replies")
+            .filter(Q(sender=request.user) | Q(receiver=request.user)),
+            id=message_id,
+        )
+
+        thread = [build_thread(m) for m in root_message]
+        return JsonResponse(thread, safe=False)
+
 
 class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
     """ViewSet for viewing user notifications."""
@@ -64,22 +76,4 @@ class MessageHistoryViewSet(viewsets.ReadOnlyModelViewSet):
         ).select_related("message", "edited_by")
 
 
-class MessageThreadView(viewsets.ModelViewSet):
-    """
-    Class-based view to fetch a message thread with all its replies.
-    Ensures the logged-in user is either the sender or receiver.
-    """
-
-    def get(self, request, message_id):
-        # Fetch the root message
-        root_message = get_object_or_404(
-            Message.objects.select_related("sender", "receiver")
-            .prefetch_related("replies"),
-            id=message_id,
-            sender=request.user,   # ✅ Enforce that only sender can view their thread
-        )
-
-        # Build recursive thread
-        thread = build_thread(root_message)
-        return JsonResponse(thread, safe=False)
 
