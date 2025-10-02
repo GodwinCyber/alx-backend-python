@@ -108,6 +108,9 @@ class MessageHistorySignalsTestCase(TestCase):
         self.assertIn('Hello, this is the original message', old_messages)
         self.assertIn('First edit.', old_messages)
 
+        for h in history_entries:
+            self.assertEqual(h.edited_by, self.sender)
+
     def test_no_history_on_new_message(self):
         """Creating a new message should not create a history entry"""
         new_message = Message.objects.create(
