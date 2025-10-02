@@ -11,6 +11,7 @@ class Message(models.Model):
     sender = models.ForeignKey(User, related_name='sent_message', on_delete=models.CASCADE)
     receiver = models.ForeignKey(User, related_name='receive_message', on_delete=models.CASCADE)
     content = models.TextField()
+    edited = models.BooleanField(default=False)
     timestamp = models.DateField(auto_now_add=True)
 
     def __str__(self):
@@ -19,7 +20,7 @@ class Message(models.Model):
     
 class Notification(models.Model):
     '''Class Notifications store the message when a user recieve message'''
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4(), editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User, related_name='notifications', on_delete=models.CASCADE)
     message = models.ForeignKey(Message, related_name='notifications', on_delete=models.CASCADE)
     created_at = models.DateField(auto_now_add=True)
@@ -30,6 +31,15 @@ class Notification(models.Model):
         return f'Notification for {self.user.email} - Message {self.message.id}'
 
 
+class MessageHistory(models.Model):
+    '''Log the old content of a message into a separate model'''
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    message = models.ForeignKey(Message, related_name='history', on_delete=models.CASCADE)
+    old_message = models.TextField()
+    edited_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        '''Return the hostory the message'''
+        return f'History for {self.message.id} at {self.edited_at}'
 
 
