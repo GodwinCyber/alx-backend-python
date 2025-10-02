@@ -36,10 +36,10 @@ class MessageHistory(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     message = models.ForeignKey(Message, related_name='history', on_delete=models.CASCADE)
     old_message = models.TextField()
-    edited_at = models.DateTimeField(auto_now_add=True)
+    edited_by = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         '''Return the hostory the message'''
-        return f'History for {self.message.id} at {self.edited_at}'
+        return f'History for {self.message.id} at {self.edited_by}'
 
 

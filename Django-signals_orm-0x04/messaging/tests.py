@@ -118,10 +118,10 @@ class MessageHistorySignalsTestCase(TestCase):
         self.assertEqual(new_message.history.count(), 0)
 
     def test_history_timestamp(self):
-        """History entries should store correct edited_at timestamp"""
+        """History entries should store correct edited_by timestamp"""
         self.message.content = 'Edited content with timestamp check'
         self.message.save()
 
         history = self.message.history.first()
-        self.assertIsNotNone(history.edited_at)
-        self.assertLessEqual(history.edited_at, timezone.now())
+        self.assertIsNotNone(history.edited_by)
+        self.assertLessEqual(history.edited_by, timezone.now())
