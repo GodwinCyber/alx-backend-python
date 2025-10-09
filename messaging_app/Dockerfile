@@ -9,19 +9,19 @@ FROM python:3.10
 WORKDIR /app
 
 # Copy requirement.txt  first
-COPY ../requirement.txt .
+COPY requirement.txt .
 
 # Install dependencies
 RUN pip install --no-cache-dir -r requirement.txt
 
 # Copy all project files into the container
-COPY .. .
+COPY . .
 
 # Expose Django's default port
 EXPOSE 8000
 
 # Default command to run Django app
-CMD ["bash", "-c", "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
 
 
