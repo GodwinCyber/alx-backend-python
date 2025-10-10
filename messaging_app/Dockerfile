@@ -9,10 +9,10 @@ FROM python:3.10
 WORKDIR /app
 
 # Copy requirement.txt  first
-COPY requirement.txt .
+COPY requirements.txt .
 
 # Install dependencies
-RUN pip install --no-cache-dir -r requirement.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy all project files into the container
 COPY . .
