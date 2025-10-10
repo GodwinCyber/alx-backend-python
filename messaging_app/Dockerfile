@@ -14,6 +14,11 @@ COPY requirements.txt .
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+# collect the static file; if django is using static files
+RUN mkdir -p /app/static_files
+# Run collect_static but ignore errors, if it is not configured yet
+RUN python manage.py collect_static --noinput --clear || true
+
 # Copy all project files into the container
 COPY . .
 
