@@ -1,4 +1,5 @@
-# Kubernetes cluster 
+#!/bin/bash
+# kurbeScript.sh
 
 # Objective: start a local kubernetes, verify the cluster and list the pod
 
