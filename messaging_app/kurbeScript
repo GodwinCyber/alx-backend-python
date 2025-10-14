@@ -1,5 +1,4 @@
 # Kubernetes cluster 
-#!/bin/bash
 
 # Objective: start a local kubernetes, verify the cluster and list the pod
 
