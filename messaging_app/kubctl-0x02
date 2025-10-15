@@ -1,0 +1,28 @@
+#!/bin/bash
+
+
+# ===========================================
+# Blue_Green Deployment Script for Django App
+# ===========================================
+
+
+echo "Applying blue deployment...."
+kubectl apply -f blue_deployment.yaml
+
+echo "Applying green deployment..."
+kubectl apply -f green_deployment.yaml
+
+echo "Waiting for green pod to start..."
+sleep 20
+
+echo "Checking green deployemnt logs..."
+kubectl logs -l app=django-web-green --tail=20
+
+ech "Logs show no errors, switching traffic to Green..."
+kubectl patch service django-service -p '{"spec":{"selector":{"app":"django-web-green"}}}'
+
+
+echo "Scale down Blue deployment to zero after verification."
+echo "kubectl scale deployment django-web --replicas=0"
+
+
