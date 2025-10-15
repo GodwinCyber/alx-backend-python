@@ -16,10 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.http import HttpResponse
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
+
+def healthcheck(request):
+    return HttpResponse("Ok")
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,6 +31,7 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),  # DRF login/logout views
     path('api-auth/', include('djoser.urls')),  # Djoser authentication endpoints
     path('api-auth/', include('djoser.urls.jwt')),  # Djoser JWT endpoints
+    path('', healthcheck),
 
     # JWT authentication endpoints
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

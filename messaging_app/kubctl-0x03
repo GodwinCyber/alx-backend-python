@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# =======================================================================
+# Purpose: Apply updated Django deployment and perform a rolling update
+# With continuous monitoring for downtime
+# =======================================================================
+
+kubectl port-forward svc/django-service 8000:8000 > /dev/null 2>&1 &
+
+deployment_file="messaging_app/blue_deployment.yaml"
+service_url="http://localhost:8000"
+
+echo "Applying updated deployment..."
+kubectl apply -f $deployment_file
+
+echo "Monitoring rolling update..."
+kubectl rollout status deployment/django-web
+
+echo "Checking app for downtime during rollout..."
+while true; do
+    response=$(curl -s -o /dev/null -w "%{http_code}" $service_url)
+    if [ "$response" -ne 200 ]; then
+        echo "[WARNING] Request failed with status code $response"
+    else
+        echo "[OK] App responded with status 200"
+    fi
+    sleep 2
+
+    # Break the loop if rollout is complete
+    status=$(kubectl rollout status deployment/django-web --watch=false 2>&1)
+    if [[ $status == *"successfully rolled out"* ]]; then
+        echo "Rolling update completed successfully"
+        break
+    fi
+done
+
+echo "Current pods:"
+kubectl get pods -l app=django-web
