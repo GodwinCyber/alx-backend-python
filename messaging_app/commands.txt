@@ -1,0 +1,22 @@
+# Installed nginx Ingress controller
+minikube addons enable Ingress
+
+# Start the minikube tunnel so that ingress can be accessed on localhost
+minikube tunnel
+
+# Installed kubectl with a cluster
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
+
+# Verify the that ingress controller is running
+kubectl get pods -n ingress-nginx
+
+# created the ingrress resources file called ingress.yaml
+
+# Apply the ingress configurations for django services
+kubectl apply -f ingress.yaml
+
+# Verify tnat ingress was created
+kubectl get ingress
+
+
+
