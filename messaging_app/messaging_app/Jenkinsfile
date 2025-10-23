@@ -2,7 +2,7 @@
   Jenkins Pipeline for Python messaging app:
   - Cleans workspace
   - Checks out repo from GitHub
-  - Installs Python and dependencies
+  - Installs dependencies
   - Runs pytest and generates a report
   - Builds, tests, and pushes Docker image
   - Cleans up local images
@@ -47,11 +47,18 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git(
-                    url: 'https://github.com/GodwinCyber/alx-backend-python.git',
-                    credentialsId: 'github-credentials',
-                    branch: "${TARGET_BRANCH}"
-                )
+                // Explicit git branch step for compliance
+                script {
+                    checkout([$class: 'GitSCM',
+                        branches: [[name: "${TARGET_BRANCH}"]],
+                        doGenerateSubmoduleConfigurations: false,
+                        extensions: [],
+                        userRemoteConfigs: [[
+                            url: 'https://github.com/GodwinCyber/alx-backend-python.git',
+                            credentialsId: "${GITHUB_CREDENTIALS}"
+                        ]]
+                    ])
+                }
             }
         }
 
@@ -61,7 +68,7 @@ pipeline {
                     sh '''
                         set -e
                         python3 -m pip install --upgrade pip
-                        pip3 install -r requirements.txt
+                        pip3 install -r messaging_app/requirements.txt
                         pip3 install pytest pytest-html
                     '''
                 }
