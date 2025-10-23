@@ -9,7 +9,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'main', 
-                    url: 'https://github.com/GodwinCyber/alx-backend-python.git', 
+                    url: 'https://github.com/GodwinCyber/alx-backend-python/tree/master/messaging_app/messaging_app', 
                     credentialsId: "${GITHUB_CREDENTIALS}"
             }
         }
