@@ -1,8 +1,18 @@
+/*
+  Jenkins Pipeline for Python messaging app:
+  - Cleans workspace
+  - Checks out repo from GitHub
+  - Installs Python and dependencies
+  - Runs pytest and generates a report
+  - Archives test report
+*/
+
 pipeline {
     agent any
 
     environment {
-        GITHUB_CREDENTIALS = 'github-credentials'
+        GITHUB_CREDENTIALS = 'github-credentials' // Replace with your Jenkins credential ID
+        APP_DIR = 'messaging_app' // Project directory
     }
 
     stages {
@@ -12,7 +22,7 @@ pipeline {
             }
         }
 
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
                 git branch: 'master',
                     url: 'https://github.com/GodwinCyber/alx-backend-python.git',
@@ -20,37 +30,42 @@ pipeline {
             }
         }
 
-        stage('Install Python') {
+        stage('Verify Python Installation') {
             steps {
                 sh '''
-                if ! command -v python3 &> /dev/null
-                then
-                    echo "Python3 not found. Installing..."
+                echo "Checking Python installation..."
+                if ! command -v python3 &> /dev/null; then
+                    echo "Python3 not found, installing..."
                     sudo apt-get update && apt-get install -y python3 python3-venv python3-pip
                 else
-                    echo "Python3 is already installed."
+                    python3 --version
+                    pip3 --version
                 fi
                 '''
             }
         }
 
-        stage('Set up Python Environment') {
+        stage('Set up Virtual Environment') {
             steps {
-                sh '''
-                python3 -m venv venv
-                . venv/bin/activate
-                pip install --upgrade pip
-                pip install -r messaging_app/requirements.txt
-                '''
+                dir("${APP_DIR}") {
+                    sh '''
+                    python3 -m venv venv
+                    . venv/bin/activate
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
+                    '''
+                }
             }
         }
 
-        stage('Run Tests') {
+        stage('Run Tests with Pytest') {
             steps {
-                sh '''
-                . venv/bin/activate
-                pytest messaging_app/tests --junitxml=report.xml
-                '''
+                dir("${APP_DIR}") {
+                    sh '''
+                    . venv/bin/activate
+                    pytest tests --junitxml=../report.xml
+                    '''
+                }
             }
         }
 
