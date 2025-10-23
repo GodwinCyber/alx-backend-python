@@ -14,13 +14,34 @@ pipeline {
             }
         }
 
+        stage('Check Python') {
+            steps {
+                echo "Verifying Python installation..."
+                sh '''
+                which python3 || echo "Python not found"
+                python3 --version || echo "No Python installed"
+                '''
+            }
+        }
+
+        stage('Setup Python (if missing)') {
+            steps {
+                sh '''
+                if ! command -v python3 &> /dev/null
+                then
+                    echo "Python3 not found. Installing..."
+                    apt-get update && apt-get install -y python3 python3-venv python3-pip
+                else
+                    echo "Python3 is already installed."
+                fi
+                '''
+            }
+        }
+
         stage('Setup Virtualenv & Install Dependencies') {
             steps {
                 sh '''
-                # Create a new virtual environment
                 python3 -m venv venv
-
-                # Activate it and install dependencies
                 . venv/bin/activate
                 pip install --upgrade pip
                 pip install -r messaging_app/requirements.txt
