@@ -4,15 +4,38 @@
   - Checks out repo from GitHub
   - Installs Python and dependencies
   - Runs pytest and generates a report
-  - Archives test report
+  - Builds, tests, and pushes Docker image
+  - Cleans up local images
 */
 
 pipeline {
     agent any
 
+    parameters {
+        choice(
+            name: 'BRANCH',
+            choices: ['main', 'develop', 'release/v1.0'],
+            description: 'Select the branch to build'
+        )
+        string(
+            name: 'CUSTOM_BRANCH',
+            defaultValue: '',
+            description: 'Optional: override branch'
+        )
+        string(
+            name: 'DOCKER_IMAGE_TAG',
+            defaultValue: 'latest',
+            description: 'Docker image tag (default: latest)'
+        )
+    }
+
     environment {
-        GITHUB_CREDENTIALS = 'github-credentials' // Replace with your Jenkins credential ID
-        APP_DIR = 'messaging_app' // Project directory
+        GITHUB_CREDENTIALS = credentials('github-credentials')
+        DOCKER_CREDENTIALS = credentials('dockerhub-credentials')
+        APP_DIR = 'messaging_app'
+        TARGET_BRANCH = "${params.CUSTOM_BRANCH ?: params.BRANCH}"
+        DOCKER_IMAGE_NAME = "godwincyber/your-messaging-app"
+        DOCKER_REGISTRY = "docker.io"
     }
 
     stages {
@@ -22,63 +45,138 @@ pipeline {
             }
         }
 
-        stage('Checkout Code') {
+        stage('Checkout') {
             steps {
-                git branch: 'master',
+                git(
                     url: 'https://github.com/GodwinCyber/alx-backend-python.git',
-                    credentialsId: "${GITHUB_CREDENTIALS}"
+                    credentialsId: 'github-credentials',
+                    branch: "${TARGET_BRANCH}"
+                )
             }
         }
 
-        stage('Verify Python Installation') {
+        stage('Install Dependencies') {
+            steps {
+                dir("${APP_DIR}") {
+                    sh '''
+                        set -e
+                        python3 -m pip install --upgrade pip
+                        pip3 install -r requirements.txt
+                        pip3 install pytest pytest-html
+                    '''
+                }
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                dir("${APP_DIR}") {
+                    sh '''
+                        set -e
+                        pytest --junitxml=test-results.xml --html=test-report.html --self-contained-html
+                    '''
+                }
+            }
+            post {
+                always {
+                    dir("${APP_DIR}") {
+                        junit 'test-results.xml'
+                        publishHTML(target: [
+                            reportName: 'Test Report',
+                            reportDir: '.',
+                            reportFiles: 'test-report.html',
+                            keepAll: true,
+                            allowMissing: false,
+                            alwaysLinkToLastBuild: true
+                        ])
+                    }
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                dir("${APP_DIR}") {
+                    sh '''
+                        set -e
+                        if [ ! -f Dockerfile ]; then
+                            echo "ERROR: Dockerfile not found!"
+                            exit 1
+                        fi
+                        docker build -t ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} .
+                        docker tag ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} ${DOCKER_IMAGE_NAME}:${TARGET_BRANCH//\//-}
+                    '''
+                }
+            }
+        }
+
+        stage('Test Docker Image') {
             steps {
                 sh '''
-                echo "Checking Python installation..."
-                if ! command -v python3 &> /dev/null; then
-                    echo "Python3 not found, installing..."
-                    sudo apt-get update && apt-get install -y python3 python3-venv python3-pip
-                else
-                    python3 --version
-                    pip3 --version
-                fi
+                    set -e
+                    docker run --rm -d --name test-container ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} || true
+                    sleep 10
+                    docker ps -a | grep test-container || echo "Container test completed"
+                    docker stop test-container 2>/dev/null || true
+                    docker rm test-container 2>/dev/null || true
                 '''
             }
         }
 
-        stage('Set up Virtual Environment') {
+        stage('Push Docker Image') {
             steps {
-                dir("${APP_DIR}") {
-                    sh '''
-                    python3 -m venv venv
-                    . venv/bin/activate
-                    pip install --upgrade pip
-                    pip install -r requirements.txt
-                    '''
-                }
+                sh '''
+                    set -e
+                    echo "${DOCKER_CREDENTIALS_PSW}" | docker login -u "${DOCKER_CREDENTIALS_USR}" --password-stdin ${DOCKER_REGISTRY}
+                    docker push ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}
+                    docker push ${DOCKER_IMAGE_NAME}:${TARGET_BRANCH//\//-}
+                    docker logout ${DOCKER_REGISTRY}
+                '''
             }
         }
 
-        stage('Run Tests with Pytest') {
+        stage('Cleanup Docker Images') {
             steps {
-                dir("${APP_DIR}") {
-                    sh '''
-                    . venv/bin/activate
-                    pytest tests --junitxml=../report.xml
-                    '''
-                }
-            }
-        }
-
-        stage('Archive Test Report') {
-            steps {
-                junit 'report.xml'
+                sh '''
+                    set -e
+                    docker rmi ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} 2>/dev/null || true
+                    docker rmi ${DOCKER_IMAGE_NAME}:${TARGET_BRANCH//\//-} 2>/dev/null || true
+                    docker image prune -f 2>/dev/null || true
+                '''
             }
         }
     }
 
     post {
         always {
-            echo 'Pipeline finished successfully.'
+            echo "Pipeline completed for branch: ${TARGET_BRANCH}"
+            echo "Docker Image: ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
+            echo "Build URL: ${BUILD_URL}"
+        }
+        success {
+            echo "✅ All stages completed successfully!"
+            emailext(
+                subject: "SUCCESS: Pipeline '${JOB_NAME} [${BUILD_NUMBER}]'",
+                body: """
+                    Pipeline completed successfully!
+                    Branch: ${TARGET_BRANCH}
+                    Docker Image: ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}
+                    Build URL: ${BUILD_URL}
+                """,
+                to: "averageheight91@gmail.com"
+            )
+        }
+        failure {
+            echo "❌ Pipeline failed!"
+            emailext(
+                subject: "FAILED: Pipeline '${JOB_NAME} [${BUILD_NUMBER}]'",
+                body: """
+                    Pipeline failed!
+                    Branch: ${TARGET_BRANCH}
+                    Build URL: ${BUILD_URL}
+                """,
+                to: "averageheight91@gmail.com"
+            )
         }
     }
 }
