@@ -1,3 +1,4 @@
+// Purpose: Simple Jenkins pipeline to checkout Python project, install deps, run pytest, and generate reports.
 pipeline {
     agent any
 
@@ -8,53 +9,31 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'master', 
-                    url: 'https://github.com/GodwinCyber/alx-backend-python.git', 
+                git branch: 'master',
+                    url: 'https://github.com/GodwinCyber/alx-backend-python.git',
                     credentialsId: "${GITHUB_CREDENTIALS}"
             }
         }
 
-        stage('Check Python') {
+        stage('Set up Python Environment') {
             steps {
-                echo "Verifying Python installation..."
-                sh '''
-                which python3 || echo "Python not found"
-                python3 --version || echo "No Python installed"
-                '''
-            }
-        }
-
-        stage('Setup Python (if missing)') {
-            steps {
-                sh '''
-                if ! command -v python3 &> /dev/null
-                then
-                    echo "Python3 not found. Installing..."
-                    apt-get update && apt-get install -y python3 python3-venv python3-pip
-                else
-                    echo "Python3 is already installed."
-                fi
-                '''
-            }
-        }
-
-        stage('Setup Virtualenv & Install Dependencies') {
-            steps {
-                sh '''
-                python3 -m venv venv
-                . venv/bin/activate
-                pip install --upgrade pip
-                pip install -r messaging_app/requirements.txt
-                '''
+                // Create a new virtualenv and install dependencies using ShiningPanda
+                withPythonEnv('python3') {
+                    sh '''
+                        pip install --upgrade pip
+                        pip install -r messaging_app/requirements.txt
+                    '''
+                }
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh '''
-                . venv/bin/activate
-                pytest messaging_app/tests --junitxml=report.xml
-                '''
+                withPythonEnv('python3') {
+                    sh '''
+                        pytest messaging_app/tests --junitxml=report.xml
+                    '''
+                }
             }
         }
 
@@ -67,7 +46,7 @@ pipeline {
 
     post {
         always {
-            echo 'Pipeline finished.'
+            echo 'Pipeline finished successfully.'
         }
     }
 }
