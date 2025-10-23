@@ -1,0 +1,44 @@
+pipeline {
+    agent any
+
+    environment {
+        GITHUB_CREDENTIALS = 'github-credentials'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'master', 
+                    url: 'https://github.com/GodwinCyber/alx-backend-python.git', 
+                    credentialsId: "${GITHUB_CREDENTIALS}"
+            }
+        }
+
+        stage('Activate Existing Virtualenv & Install Dependencies') {
+            steps {
+                // Activate existing venv and upgrade pip & install dependencies
+                sh '. messaging_app/virt/bin/activate && pip install --upgrade pip'
+                sh '. messaging_app/virt/bin/activate && pip install -r messaging_app/requirements.txt'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                // Run pytest using your existing venv
+                sh '. messaging_app/virt/bin/activate && pytest messaging_app/tests --junitxml=report.xml'
+            }
+        }
+
+        stage('Archive Test Report') {
+            steps {
+                junit 'report.xml'
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline finished.'
+        }
+    }
+}
