@@ -1,4 +1,3 @@
-// Purpose: Simple Jenkins pipeline to checkout Python project, install deps, run pytest, and generate reports.
 pipeline {
     agent any
 
@@ -17,23 +16,21 @@ pipeline {
 
         stage('Set up Python Environment') {
             steps {
-                // Create a new virtualenv and install dependencies using ShiningPanda
-                withPythonEnv('python3') {
-                    sh '''
-                        pip install --upgrade pip
-                        pip install -r messaging_app/requirements.txt
-                    '''
-                }
+                sh '''
+                python3 -m venv venv
+                . venv/bin/activate
+                pip install --upgrade pip
+                pip install -r messaging_app/requirements.txt
+                '''
             }
         }
 
         stage('Run Tests') {
             steps {
-                withPythonEnv('python3') {
-                    sh '''
-                        pytest messaging_app/tests --junitxml=report.xml
-                    '''
-                }
+                sh '''
+                . venv/bin/activate
+                pytest messaging_app/tests --junitxml=report.xml
+                '''
             }
         }
 
