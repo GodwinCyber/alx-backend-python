@@ -14,18 +14,26 @@ pipeline {
             }
         }
 
-        stage('Activate Existing Virtualenv & Install Dependencies') {
+        stage('Setup Virtualenv & Install Dependencies') {
             steps {
-                // Activate existing venv and upgrade pip & install dependencies
-                sh '. messaging_app/virt/bin/activate && pip install --upgrade pip'
-                sh '. messaging_app/virt/bin/activate && pip install -r messaging_app/requirements.txt'
+                sh '''
+                # Create a new virtual environment
+                python3 -m venv venv
+
+                # Activate it and install dependencies
+                . venv/bin/activate
+                pip install --upgrade pip
+                pip install -r messaging_app/requirements.txt
+                '''
             }
         }
 
         stage('Run Tests') {
             steps {
-                // Run pytest using your existing venv
-                sh '. messaging_app/virt/bin/activate && pytest messaging_app/tests --junitxml=report.xml'
+                sh '''
+                . venv/bin/activate
+                pytest messaging_app/tests --junitxml=report.xml
+                '''
             }
         }
 
