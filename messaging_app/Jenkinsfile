@@ -14,6 +14,20 @@ pipeline {
             }
         }
 
+        stage('Install Python') {
+            steps {
+                sh '''
+                if ! command -v python3 &> /dev/null
+                then
+                    echo "Python3 not found. Installing..."
+                    apt-get update && apt-get install -y python3 python3-venv python3-pip
+                else
+                    echo "Python3 is already installed."
+                fi
+                '''
+            }
+        }
+
         stage('Set up Python Environment') {
             steps {
                 sh '''
