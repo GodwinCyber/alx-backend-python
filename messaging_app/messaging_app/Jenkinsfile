@@ -47,7 +47,6 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                // Explicit git branch step for compliance
                 script {
                     checkout([$class: 'GitSCM',
                         branches: [[name: "${TARGET_BRANCH}"]],
@@ -111,7 +110,7 @@ pipeline {
                             exit 1
                         fi
                         docker build -t ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} .
-                        docker tag ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} ${DOCKER_IMAGE_NAME}:${TARGET_BRANCH//\//-}
+                        docker tag ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} ${DOCKER_IMAGE_NAME}:$(echo ${TARGET_BRANCH} | tr '/' '-')
                     '''
                 }
             }
@@ -136,7 +135,7 @@ pipeline {
                     set -e
                     echo "${DOCKER_CREDENTIALS_PSW}" | docker login -u "${DOCKER_CREDENTIALS_USR}" --password-stdin ${DOCKER_REGISTRY}
                     docker push ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}
-                    docker push ${DOCKER_IMAGE_NAME}:${TARGET_BRANCH//\//-}
+                    docker push ${DOCKER_IMAGE_NAME}:$(echo ${TARGET_BRANCH} | tr '/' '-')
                     docker logout ${DOCKER_REGISTRY}
                 '''
             }
@@ -147,7 +146,7 @@ pipeline {
                 sh '''
                     set -e
                     docker rmi ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} 2>/dev/null || true
-                    docker rmi ${DOCKER_IMAGE_NAME}:${TARGET_BRANCH//\//-} 2>/dev/null || true
+                    docker rmi ${DOCKER_IMAGE_NAME}:$(echo ${TARGET_BRANCH} | tr '/' '-') 2>/dev/null || true
                     docker image prune -f 2>/dev/null || true
                 '''
             }
