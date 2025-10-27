@@ -14,7 +14,7 @@ pipeline {
     parameters {
         choice(
             name: 'BRANCH',
-            choices: ['main', 'develop', 'release/v1.0'],
+            choices: ['master', 'develop', 'release/v1.0'],
             description: 'Select the branch to build'
         )
         string(
@@ -34,7 +34,7 @@ pipeline {
         DOCKER_CREDENTIALS = credentials('dockerhub-credentials')
         APP_DIR = 'messaging_app'
         TARGET_BRANCH = "${params.CUSTOM_BRANCH ?: params.BRANCH}"
-        DOCKER_IMAGE_NAME = "godwincyber/your-messaging-app"
+        DOCKER_IMAGE_NAME = "dokerfixer/jenkin-messaging-app"
         DOCKER_REGISTRY = "docker.io"
     }
 
